@@ -1,0 +1,1 @@
+E:\rust-complte-developer-guide\rust-programming-ztm\rust-course-data\exercises\activities\target\debug\a12.exe: E:\rust-complte-developer-guide\rust-programming-ztm\rust-course-data\exercises\activities\src\bin\a12.rs

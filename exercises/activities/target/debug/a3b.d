@@ -1,0 +1,1 @@
+E:\rust-complte-developer-guide\rust-programming-ztm\rust-course-data\exercises\activities\target\debug\a3b.exe: E:\rust-complte-developer-guide\rust-programming-ztm\rust-course-data\exercises\activities\src\bin\a3b.rs
