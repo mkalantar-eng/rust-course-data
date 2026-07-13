@@ -27,4 +27,9 @@ fn main() {
     };
 
     student.print();
+
+    match student.locker_assignment {
+        Some(n) => println!("locker assignment: {n}"),
+        None => println!("No locker assignment!"),
+    }
 }
