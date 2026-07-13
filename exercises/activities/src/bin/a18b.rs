@@ -22,4 +22,22 @@
 // * Print whether the employee may access the building
 //   * Must use a function that utilizes the question mark operator to do this
 
+enum EmployeeType {
+    MaintenanceCrew,
+    MarketingDepartmentEmployee,
+    Manager,
+    LineSupervisor,
+    KitchenStaff,
+    AssemblyTechnician,
+}
+
+struct Employee {
+    emp_type: EmployeeType,
+    terminated_employment: bool,
+}
+
+fn mayEnterBuilding() -> Result<(), String> {
+    
+}
+
 fn main() {}
