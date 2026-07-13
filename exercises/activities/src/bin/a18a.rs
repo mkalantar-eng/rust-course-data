@@ -23,14 +23,14 @@ struct Adult {
 }
 
 impl Adult {
-    fn new(name: &str, age: u32) -> Result<Self, String> {
+    fn new(name: &str, age: u32) -> Result<Self, &str> {
         if age > 20 {
             Ok(Self {
                 name: name.to_owned(),
                 age,
             })
         } else {
-            Err("Sorry!, your age must be 21 or older".to_owned())
+            Err("Sorry!, your age must be 21 or older")
         }
     }
 }
