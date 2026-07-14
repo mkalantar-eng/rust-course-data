@@ -22,6 +22,7 @@
 // * Print whether the employee may access the building
 //   * Must use a function that utilizes the question mark operator to do this
 
+#[derive(Debug)]
 enum EmployeeType {
     MaintenanceCrew,
     MarketingDepartmentEmployee,
@@ -36,8 +37,41 @@ struct Employee {
     terminated_employment: bool,
 }
 
-fn mayEnterBuilding() -> Result<(), String> {
-    
+impl Employee {
+    fn new(emp_type: EmployeeType, terminated_employment: bool) -> Self {
+        Self {
+            emp_type,
+            terminated_employment,
+        }
+    }
+
+    fn may_enter_building(&self) -> Result<(), &str> {
+        if self.terminated_employment {
+            Err("Sorry!, terminated employees cannot access the building regardless of their position")
+        } else {
+            Ok(())
+        }
+    }
 }
 
-fn main() {}
+fn print(emp: &Employee) -> Result<(), &str> {
+    emp.may_enter_building()?;
+
+    println!("Access is permitted for {:?}", emp.emp_type);
+
+    Ok(())
+}
+
+fn main() {
+    let terminated_emp = Employee::new(EmployeeType::LineSupervisor, true);
+    match print(&terminated_emp) {
+        Ok(_) => {}
+        Err(msg) => println!("{msg}"),
+    }
+
+    let active_emp = Employee::new(EmployeeType::AssemblyTechnician, false);
+    match print(&active_emp) {
+        Ok(_) => {}
+        Err(msg) => println!("{msg}"),
+    }
+}
