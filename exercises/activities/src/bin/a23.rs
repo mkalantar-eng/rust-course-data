@@ -8,27 +8,6 @@
 // * Run `cargo test --bin a23` to check your program.
 // * Only edit the part_1, part_2, and part_3 functions.
 
-fn part_1() -> bool {
-    // We are checking whether or not this particular user
-    // has an access level. The "admin" user does have
-    // an access level.
-    // Note: Use is_some or is_none.
-    maybe_access("admin")
-}
-
-fn part_2() -> Option<Access> {
-    // "Root" is equivalent to Access::Admin, but it is
-    // not listed in the maybe_access function.
-    // Note: Use or_else and root().
-    maybe_access("root")
-}
-
-fn part_3() -> Access {
-    // "Alice" is not a listed user, so she will be a guest.
-    // Note: Use unwrap_or_else.
-    maybe_access("Alice")
-}
-
 #[derive(Debug, Eq, PartialEq)]
 enum Access {
     Admin,
@@ -46,6 +25,27 @@ fn maybe_access(name: &str) -> Option<Access> {
 
 fn root() -> Option<Access> {
     Some(Access::Admin)
+}
+
+fn part_1() -> bool {
+    // We are checking whether or not this particular user
+    // has an access level. The "admin" user does have
+    // an access level.
+    // Note: Use is_some or is_none.
+    maybe_access("admin").is_some()
+}
+
+fn part_2() -> Option<Access> {
+    // "Root" is equivalent to Access::Admin, but it is
+    // not listed in the maybe_access function.
+    // Note: Use or_else and root().
+    maybe_access("root").or_else(|| root())
+}
+
+fn part_3() -> Access {
+    // "Alice" is not a listed user, so she will be a guest.
+    // Note: Use unwrap_or_else.
+    maybe_access("Alice").unwrap_or_else(||Access::Guest)
 }
 
 fn main() {}
