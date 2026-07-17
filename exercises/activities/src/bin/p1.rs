@@ -29,4 +29,76 @@
 // * A vector is the easiest way to store the bills at stage 1, but a
 //   hashmap will be easier to work with at stages 2 and 3.
 
-fn main() {}
+use std::io;
+
+#[derive(Debug)]
+struct Bill {
+    name: String,
+    amount: f64,
+}
+
+impl Bill {
+    fn new(name: String, amount: f64) -> Self {
+        Self { name, amount }
+    }
+}
+
+fn get_input() -> io::Result<String> {
+    let mut buffer = String::new();
+    io::stdin().read_line(&mut buffer)?;
+
+    Ok(buffer.trim().to_string())
+}
+
+fn display_menu() -> io::Result<String> {
+    println!();
+    println!("== Manage Bills ==");
+    println!("1. Add bill");
+    println!("2. Search bills");
+    println!("3. View all bills");
+    println!("4. Remove bill");
+    println!("5. Update bill");
+    println!("6. Bill total");
+    println!("7. Quit");
+    println!();
+    println!("Enter selection: ");
+
+    get_input()
+}
+fn main() {
+    let mut bills: Vec<Bill> = vec![];
+    loop {
+        match display_menu() {
+            Ok(selection) => match selection.as_str() {
+                "1" => {
+                    println!("Enter name: ");
+                    if let Ok(name) = get_input() {
+                        println!("Enter amount owed: ");
+                        if let Ok(amount) = get_input() {
+                            bills.push(Bill::new(name, amount.parse().unwrap()));
+                        }
+                    }
+                }
+                "2" => {
+                    println!("Enter name to search: ");
+                    if let Ok(name) = get_input() {
+                        bills
+                            .iter()
+                            .filter(|bill| bill.name == name)
+                            .for_each(|bill| println!("{:?}", bill));
+                    }
+                }
+                "3" => {
+                    if bills.is_empty() {
+                        println!("There are no available bills");
+                        continue;
+                    }
+                    bills.iter().for_each(|bill| println!("{:?}", bill));
+                }
+                "7" => return,
+                _ => println!("Enter number between 1 and 6"),
+            },
+            Err(msg) => println!("Error: {}", msg),
+        }
+    }
+}
