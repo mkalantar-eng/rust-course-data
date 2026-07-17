@@ -24,7 +24,7 @@
 //
 // Tips:
 // * Use the loop keyword to create an interactive menu.
-// * Each menu choice should be it's own function, so you can work on the
+// * Each menu choice should be its own function, so you can work on
 //   the functionality for that menu in isolation.
 // * A vector is the easiest way to store the bills at stage 1, but a
 //   hashmap will be easier to work with at stages 2 and 3.
