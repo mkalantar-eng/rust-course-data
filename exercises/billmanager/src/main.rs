@@ -1,0 +1,102 @@
+// Project 1: Interactive bill manager
+//
+// Summary:
+//   Create a command line bills/expenses manager that runs
+//   interactively. This mini project brings together many of
+//   the concepts learn thus far into a single application.
+//
+//   The user stories/requirements are split into stages.
+//   Fully implement each stage as a complete working program
+//   before making changes for the next stage. Leverage the
+//   compiler by using `cargo check --bin p1` when changing
+//   between stages to help identify adjustments that need
+//   to be made.
+//
+// User stories:
+// * Stage 1:
+//   - I want to add bills, including the name and amount owed.
+//   - I want to view existing bills.
+// * Stage 2:
+//   - I want to remove bills.
+// * Stage 3:
+//   - I want to edit existing bills.
+//   - I want to go back if I change my mind.
+//
+// Tips:
+// * Use the loop keyword to create an interactive menu.
+// * Each menu choice should be its own function, so you can work on
+//   the functionality for that menu in isolation.
+// * A vector is the easiest way to store the bills at stage 1, but a
+//   hashmap will be easier to work with at stages 2 and 3.
+
+use std::io;
+
+#[derive(Debug, Clone)]
+struct Bill {
+    name: String,
+    amount: f64,
+}
+
+struct Bills {
+    list: Vec<Bill>,
+}
+
+impl Bills {
+    fn new() -> Self {
+        Self { list: vec![] }
+    }
+
+    fn add(&mut self, bill: Bill) {
+        self.list.push(bill);
+    }
+
+    fn get_all(&self) -> Vec<&Bill> {
+        self.list.iter().collect()
+    }
+}
+
+fn get_input() -> Option<String> {
+    let mut buf = String::new();
+    while io::stdin().read_line(&mut buf).is_err() {
+        println!("Please enter your data again");
+    }
+    let input = buf.trim().to_string();
+    if input == "" {
+        return None;
+    }
+    Some(input)
+}
+
+enum MainMenu {
+    AddBill,
+    ViewBill,
+}
+
+impl MainMenu {
+    fn from_str(input: &str) -> Option<Self> {
+        match input {
+            "1" => Some(Self::AddBill),
+            "2" => Some(Self::ViewBill),
+            _ => None,
+        }
+    }
+    fn show() {
+        println!();
+        println!("== Manage Bills ==");
+        println!("1. Add bill");
+        println!("2. View bills");
+        println!();
+        println!("Enter selection: ");
+    }
+}
+fn main() {
+    loop {
+        MainMenu::show();
+        let input = get_input().expect("No data entered");
+        match MainMenu::from_str(input.as_str()) {
+            Some(MainMenu::AddBill) => {}
+            Some(MainMenu::ViewBill) => {}
+            None => return,
+        }
+    }
+}
