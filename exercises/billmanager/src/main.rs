@@ -51,8 +51,7 @@ impl Bills {
     }
 
     fn add(&mut self, bill: Bill) {
-        let b = bill.clone();
-        self.map.insert(bill.name, b);
+        self.map.insert(bill.name.to_string(), bill);
     }
 
     fn get_all(&self) -> Vec<&Bill> {
