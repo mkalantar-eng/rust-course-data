@@ -28,30 +28,39 @@
 //   the functionality for that menu in isolation.
 // * A vector is the easiest way to store the bills at stage 1, but a
 //   hashmap will be easier to work with at stages 2 and 3.
+pub mod menu;
 
+use std::collections::HashMap;
 use std::io;
 
 #[derive(Debug, Clone)]
-struct Bill {
+pub struct Bill {
     name: String,
     amount: f64,
 }
 
 struct Bills {
-    list: Vec<Bill>,
+    map: HashMap<String, Bill>,
 }
 
 impl Bills {
     fn new() -> Self {
-        Self { list: vec![] }
+        Self {
+            map: HashMap::new(),
+        }
     }
 
     fn add(&mut self, bill: Bill) {
-        self.list.push(bill);
+        let b = bill.clone();
+        self.map.insert(bill.name, b);
     }
 
     fn get_all(&self) -> Vec<&Bill> {
-        self.list.iter().collect()
+        self.map.values().collect()
+    }
+
+    fn remove(&mut self, name: &str) -> Option<Bill> {
+        self.map.remove(&name.to_string())
     }
 }
 
@@ -66,10 +75,29 @@ fn get_input() -> Option<String> {
     }
     Some(input)
 }
+fn get_bill_amount() -> Option<f64> {
+    println!("Amount");
+    loop {
+        let input = match get_input() {
+            Some(input) => input,
+            None => return None,
+        };
+        if input == "" {
+            return None;
+        }
+
+        let amount: Result<f64, _> = input.parse();
+        match amount {
+            Ok(amount) => return Some(amount),
+            Err(_) => println!("Please enter a number"),
+        }
+    }
+}
 
 enum MainMenu {
     AddBill,
     ViewBill,
+    RemoveBill
 }
 
 impl MainMenu {
@@ -77,6 +105,7 @@ impl MainMenu {
         match input {
             "1" => Some(Self::AddBill),
             "2" => Some(Self::ViewBill),
+            "3" => Some(Self::RemoveBill),
             _ => None,
         }
     }
@@ -85,17 +114,20 @@ impl MainMenu {
         println!("== Manage Bills ==");
         println!("1. Add bill");
         println!("2. View bills");
+        println!("3. Remove bills");
         println!();
         println!("Enter selection: ");
     }
 }
 fn main() {
+    let mut bills = Bills::new();
     loop {
         MainMenu::show();
         let input = get_input().expect("No data entered");
         match MainMenu::from_str(input.as_str()) {
-            Some(MainMenu::AddBill) => {}
-            Some(MainMenu::ViewBill) => {}
+            Some(MainMenu::AddBill) => menu::add_bill(&mut bills),
+            Some(MainMenu::ViewBill) => menu::view_bills(&bills),
+            Some(MainMenu::RemoveBill) => menu::remove_bill(&mut bills),
             None => return,
         }
     }
