@@ -61,6 +61,18 @@ impl Bills {
     fn remove(&mut self, name: &str) -> Option<Bill> {
         self.map.remove(&name.to_string())
     }
+    fn update(&mut self, name: &str, amount: f64) {
+        match self.map.get(name) {
+            Some(bill) => {
+                let updated = Bill {
+                    name: bill.name.clone(),
+                    amount,
+                };
+                self.map.insert(name.to_string(), updated);
+            }
+            None => println!("Bill not found")
+        }
+    }
 }
 
 fn get_input() -> Option<String> {
@@ -96,7 +108,8 @@ fn get_bill_amount() -> Option<f64> {
 enum MainMenu {
     AddBill,
     ViewBill,
-    RemoveBill
+    RemoveBill,
+    UpdateBill,
 }
 
 impl MainMenu {
@@ -105,6 +118,7 @@ impl MainMenu {
             "1" => Some(Self::AddBill),
             "2" => Some(Self::ViewBill),
             "3" => Some(Self::RemoveBill),
+            "4" => Some(Self::UpdateBill),
             _ => None,
         }
     }
@@ -114,6 +128,7 @@ impl MainMenu {
         println!("1. Add bill");
         println!("2. View bills");
         println!("3. Remove bills");
+        println!("4. Edit bill");
         println!();
         println!("Enter selection: ");
     }
@@ -127,6 +142,7 @@ fn main() {
             Some(MainMenu::AddBill) => menu::add_bill(&mut bills),
             Some(MainMenu::ViewBill) => menu::view_bills(&bills),
             Some(MainMenu::RemoveBill) => menu::remove_bill(&mut bills),
+            Some(MainMenu::UpdateBill) => menu::update_bill(&mut bills),
             None => return,
         }
     }
