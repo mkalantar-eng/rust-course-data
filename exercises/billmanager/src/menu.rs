@@ -31,7 +31,7 @@ pub(crate) fn remove_bill(bills: &mut Bills) {
     }
 }
 pub(crate) fn update_bill(bills: &mut Bills) {
-    println!("Bill name");
+    println!("Enter bill name to update");
     let name = match get_input() {
         Some(input) => input,
         None => return,
@@ -40,5 +40,9 @@ pub(crate) fn update_bill(bills: &mut Bills) {
         Some(input) => input,
         None => return,
     };
-    bills.update(&name, amount);
+    if bills.update(&name, amount) {
+        println!("Updated");
+    } else {
+        println!("No bill with name {name}");
+    }
 }

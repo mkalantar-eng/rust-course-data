@@ -40,34 +40,35 @@ pub struct Bill {
 }
 
 struct Bills {
-    map: HashMap<String, Bill>,
+    collection: HashMap<String, Bill>,
 }
 
 impl Bills {
     fn new() -> Self {
         Self {
-            map: HashMap::new(),
+            collection: HashMap::new(),
         }
     }
 
     fn add(&mut self, bill: Bill) {
-        self.map.insert(bill.name.to_string(), bill);
+        self.collection.insert(bill.name.to_string(), bill);
     }
 
     fn get_all(&self) -> Vec<&Bill> {
-        self.map.values().collect()
+        self.collection.values().collect()
     }
 
     fn remove(&mut self, name: &str) -> Option<Bill> {
-        self.map.remove(&name.to_string())
+        self.collection.remove(&name.to_string())
     }
 
-    fn update(&mut self, name: &str, amount: f64) {
-        match self.map.get_mut(name) {
+    fn update(&mut self, name: &str, amount: f64) -> bool {
+        match self.collection.get_mut(name) {
             Some(bill) => {
-                bill.name = name.to_string();
+                bill.amount = amount;
+                true
             }
-            None => println!("Bill not found")
+            None => false
         }
     }
 }
@@ -130,17 +131,24 @@ impl MainMenu {
         println!("Enter selection: ");
     }
 }
-fn main() {
+
+fn run() -> Option<()> {
     let mut bills = Bills::new();
     loop {
         MainMenu::show();
-        let input = get_input().expect("No data entered");
+        let input = get_input()?;
         match MainMenu::from_str(input.as_str()) {
             Some(MainMenu::AddBill) => menu::add_bill(&mut bills),
             Some(MainMenu::ViewBill) => menu::view_bills(&bills),
             Some(MainMenu::RemoveBill) => menu::remove_bill(&mut bills),
             Some(MainMenu::UpdateBill) => menu::update_bill(&mut bills),
-            None => return,
+            None => break
+
         }
     }
+    None
+}
+
+fn main() {
+    run();
 }
