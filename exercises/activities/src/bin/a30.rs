@@ -32,25 +32,31 @@ enum VehicleBody {
 }
 
 #[derive(Debug)]
-enum VehicleColor {
-    Red,
-    White,
-    Black,
-}
+struct Car;
+impl Body for Car {}
 
-impl Body for VehicleBody {}
-impl Color for VehicleColor {}
+#[derive(Debug)]
+struct Truck;
+impl Body for Truck {}
 
-impl Vehicle<VehicleBody, VehicleColor> {
-    fn new(body: VehicleBody, color: VehicleColor) -> Self {
+#[derive(Debug)]
+struct Red;
+impl Color for Red {}
+
+#[derive(Debug)]
+struct Black;
+impl Color for Black {}
+
+impl<T: Body, U: Color> Vehicle<T, U> {
+    fn new(body: T, color: U) -> Self {
         Self { body, color }
     }
 }
 
 fn main() {
-    let benz = Vehicle::new(VehicleBody::Truck, VehicleColor::White);
+    let benz = Vehicle::new(Truck, Black);
     println!("{:?}", benz);
 
-    let bmw = Vehicle::new(VehicleBody::Car, VehicleColor::Black);
+    let bmw = Vehicle::new(Car, Red);
     println!("{:?}", bmw);
 }
