@@ -12,4 +12,23 @@
 
 const MOCK_DATA: &'static str = include_str!("mock-data.csv");
 
-fn main() {}
+#[derive(Debug)]
+struct Person<'a> {
+    first_name: &'a str,
+    title: &'a str,
+}
+
+fn main() {
+    let mut persons: Vec<Person> = vec![];
+    let mut lines = MOCK_DATA.lines().skip(1);
+    while let Some(line) = lines.next() {
+        let parts: Vec<_> = line.split(',').collect();
+        let person = Person {
+            first_name: parts[1],
+            title: parts[4],
+        };
+
+        println!("{:?}", person);
+        persons.push(person);
+    }
+}
