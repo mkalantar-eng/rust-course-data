@@ -10,7 +10,9 @@
 // * Create a function for each type of clothes (shoes, shirt, pants)
 //   that accepts the new type color specific to that type of clothing
 
-#[derive(Debug)]
+use std::cmp::PartialEq;
+
+#[derive(Debug, PartialEq)]
 enum Color {
     Black,
     Blue,
@@ -25,46 +27,51 @@ enum Color {
 }
 
 #[derive(Debug)]
-struct Shoe(Color);
-impl Shoe {
+struct ShoesColor(Color);
+impl ShoesColor {
     fn new(color: Color) -> Self {
         Self(color)
-    }
-
-    fn set_color(&mut self, color: Color) {
-        self.0 = color;
     }
 }
 #[derive(Debug)]
-struct Shirt(Color);
-impl Shirt {
-    fn new(color: Color) -> Self {
-        Self(color)
-    }
-
-    fn set_color(&mut self, color: Color) {
-        self.0 = color;
+struct ShirtColor(Color);
+impl ShirtColor {
+    fn new(color: Color) -> Result<Self, String> {
+        match color {
+            Color::Purple => Err(String::from("Not allowed color")),
+            other => Ok(Self(other)),
+        }
     }
 }
 #[derive(Debug)]
-struct Pants(Color);
-impl Pants {
+struct PantsColor(Color);
+impl PantsColor {
     fn new(color: Color) -> Self {
         Self(color)
     }
+}
 
-    fn set_color(&mut self, color: Color) {
-        self.0 = color;
-    }
+fn print_shoes_color<'a>(color: ShoesColor) {
+    println!("{:?}", color);
+}
+
+fn print_shirts_color<'a>(color: ShirtColor) {
+    println!("{:?}", color);
+}
+
+fn print_pants_color<'a>(color: PantsColor) {
+    println!("{:?}", color);
 }
 fn main() {
-    let brown_shirt = Shirt::new(Color::Brown);
-    let red_shoe = Shoe::new(Color::Red);
-    let mut custom_pants = Pants::new(Color::Custom("Deep blue".to_string()));
+    let brown_shirt = ShirtColor::new(Color::Brown);
+    match brown_shirt {
+        Ok(color) => print_shirts_color(color),
+        Err(msg) => println!("{}", msg),
+    }
+    let red_shoe = ShoesColor::new(Color::Red);
+    print_shoes_color(red_shoe);
 
-    println!("{:?}", brown_shirt);
-    println!("{:?}", red_shoe);
-    println!("{:?}", custom_pants);
-    custom_pants.set_color(Color::Blue);
-    println!("{:?}", custom_pants);
+    let custom_pants = PantsColor::new(Color::Custom("Deep blue".to_string()));
+    print_pants_color(custom_pants);
+
 }
