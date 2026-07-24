@@ -14,17 +14,19 @@ fn data() -> &'static [u64] {
     &[5, 5, 4, 4, 3, 3, 1]
 }
 
+fn process(pair: &[u64]) {
+    match pair {
+        [left, right] => println!("{:?} + {:?} = {:?}", left, right, left + right),
+        [mono] => println!("Unpaired value: {}", mono),
+        [] => println!("Data stream complete"),
+        [..] => (),
+    }
+}
+
 fn main() {
     // `stream` is an iterator of Option<&[u64]>
     let stream = data().chunks(2);
     for pair in stream {
-        let slice = pair.iter().as_slice();
-        if slice.len() == 2 {
-            println!("{:?} ==> {:?}", slice, slice[0] + slice[1]);
-        } else if slice.len() == 1 {
-            println!("Unpaired value: {:?}", slice[0]);
-        }
+        process(pair);
     }
-
-    println!("Data stream complete");
 }
