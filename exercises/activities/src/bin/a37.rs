@@ -11,7 +11,7 @@
 //    #001122 -> Rgb(0, 17, 34)
 //
 // Requirements:
-// * Create a program to convert a hex code (as &str) into an Rgb struct
+// * Create a program to convert a hex code (as &str) into Rgb struct
 // * Implement TryFrom to perform the conversion
 // * Utilize the question mark operator in your implementation
 //
@@ -22,8 +22,44 @@
 // * Utilize the `thiserror` crate for your error type
 // * Run `cargo test --bin a37` to test your implementation
 
+use std::convert::TryFrom;
+use std::num::ParseIntError;
+use thiserror::Error;
+
 #[derive(Debug, Eq, PartialEq)]
 struct Rgb(u8, u8, u8);
+
+#[derive(Error, Debug)]
+enum HexColorParsingError {
+    #[error("Invalid hex digits")]
+    InvalidHexDigits(#[from] ParseIntError),
+
+    #[error("Missing color components")]
+    MissingColorComponents,
+
+    #[error("Missing #")]
+    MissingHashSign,
+
+    #[error("Too many color components")]
+    TooManyColorComponents,
+}
+impl TryFrom<&str> for Rgb {
+    type Error = HexColorParsingError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if !value.starts_with('#') {
+            return Err(HexColorParsingError::MissingHashSign);
+        }
+        if value.len() < 7 {
+            return Err(HexColorParsingError::MissingColorComponents);
+        } else if value.len() > 7 {
+            return Err(HexColorParsingError::TooManyColorComponents);
+        }
+        let r = u8::from_str_radix(&value[1..3], 16)?;
+        let g = u8::from_str_radix(&value[3..5], 16)?;
+        let b = u8::from_str_radix(&value[5..7], 16)?;
+        Ok(Rgb(r, g, b))
+    }
+}
 
 fn main() {
     // Use `cargo test --bin a37` to test your implementation
