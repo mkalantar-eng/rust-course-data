@@ -81,7 +81,10 @@ struct MessageQueueStorageError {
 enum FileStoreError {
     #[error("IO error")]
     IO(#[from] io::Error),
-    // add more variants if needed
+    #[error("invalid message format")]
+    InvalidFormat,
+    #[error("invalid message id")]
+    Parse(#[from] ParseIntError),
 }
 
 /// Allows conversion of error type using question mark operator.
@@ -153,26 +156,11 @@ impl MessageQueue {
 * - `FileStore` struct
 * - implementation blocks
 ********************************************/
-impl From<io::Error> for MessageQueueStorageError {
-    fn from(value: io::Error) -> Self {
-        Self {
-            source: eyre!(value),
-        }
-    }
-}
-
-impl From<ParseIntError> for MessageQueueStorageError {
-    fn from(value: ParseIntError) -> Self {
-        Self {
-            source: eyre!(value),
-        }
-    }
-}
-
 trait MessageQueueStorage {
     fn save(&self, queue: &MessageQueue) -> Result<(), MessageQueueStorageError>;
     fn load(&self) -> Result<MessageQueue, MessageQueueStorageError>;
 }
+
 struct FileStore {
     path: String,
 }
@@ -183,39 +171,47 @@ impl FileStore {
             path: path.to_string(),
         }
     }
-}
 
-impl MessageQueueStorage for FileStore {
-    fn save(&self, queue: &MessageQueue) -> Result<(), MessageQueueStorageError> {
-        let path = Path::new(&self.path);
-        let mut file = File::create(&path)?;
-
-        for msg in &queue.messages {
+    fn save_queue(&self, queue: &MessageQueue) -> Result<(), FileStoreError> {
+        let mut file = File::create(Path::new(&self.path))?;
+        for msg in queue.iter() {
             writeln!(file, "{},{}", msg.id, msg.content)?;
         }
         Ok(())
     }
 
-    fn load(&self) -> Result<MessageQueue, MessageQueueStorageError> {
-        let mut mq = MessageQueue {
-            messages: VecDeque::new(),
-            next_id: 0,
-        };
+    fn load_queue(&self) -> Result<MessageQueue, FileStoreError> {
+        let mut messages = VecDeque::new();
+        let mut max_id = None;
 
-        let mut id = 0;
         for line in fs::read_to_string(&self.path)?.lines() {
-            let string = line.to_string();
-            let parts: Vec<_> = string.split(",").collect();
-            id = parts[0].parse()?;
-            mq.messages.push_back(Message {
+            if line.is_empty() {
+                continue;
+            }
+            let (id_str, content) = line.split_once(',').ok_or(FileStoreError::InvalidFormat)?;
+            let id: u32 = id_str.parse()?;
+            messages.push_back(Message {
                 id,
-                content: parts[1].to_string(),
-            })
+                content: content.to_string(),
+            });
+            max_id = Some(id);
         }
 
-        mq.next_id = id + 1;
+        Ok(MessageQueue {
+            messages,
+            next_id: max_id.map(|id| id + 1).unwrap_or(0),
+        })
+    }
+}
 
-        Ok(mq)
+impl MessageQueueStorage for FileStore {
+    fn save(&self, queue: &MessageQueue) -> Result<(), MessageQueueStorageError> {
+        self.save_queue(queue)?;
+        Ok(())
+    }
+
+    fn load(&self) -> Result<MessageQueue, MessageQueueStorageError> {
+        Ok(self.load_queue()?)
     }
 }
 
@@ -226,14 +222,21 @@ impl MessageQueueStorage for FileStore {
 /// *****************************************************************
 fn main() -> color_eyre::Result<()> {
     // show pretty error output
-    color_eyre::install().unwrap();
+    color_eyre::install()?;
+
+    const DEMO_FILE: &str = ".mc-01-demo";
 
     let mut queue = MessageQueue::default();
     queue.enqueue("first message");
     queue.enqueue("second message");
-    Ok(())
 
-    // save/load here
+    let storage = FileStore::new(DEMO_FILE);
+    storage.save(&queue)?;
+    let loaded = storage.load()?;
+    assert_eq!(loaded, queue);
+
+    let _ = fs::remove_file(DEMO_FILE);
+    Ok(())
 }
 
 #[cfg(test)]
