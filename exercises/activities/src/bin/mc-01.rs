@@ -33,6 +33,11 @@
 
 use color_eyre::eyre::eyre;
 use std::collections::VecDeque;
+use std::fs::File;
+use std::io::Write;
+use std::num::ParseIntError;
+use std::path::Path;
+use std::{fs, io};
 
 /// A message in the queue.
 ///
@@ -75,7 +80,7 @@ struct MessageQueueStorageError {
 #[derive(Debug, thiserror::Error)]
 enum FileStoreError {
     #[error("IO error")]
-    IO(#[from] std::io::Error),
+    IO(#[from] io::Error),
     // add more variants if needed
 }
 
@@ -148,6 +153,71 @@ impl MessageQueue {
 * - `FileStore` struct
 * - implementation blocks
 ********************************************/
+impl From<io::Error> for MessageQueueStorageError {
+    fn from(value: io::Error) -> Self {
+        Self {
+            source: eyre!(value),
+        }
+    }
+}
+
+impl From<ParseIntError> for MessageQueueStorageError {
+    fn from(value: ParseIntError) -> Self {
+        Self {
+            source: eyre!(value),
+        }
+    }
+}
+
+trait MessageQueueStorage {
+    fn save(&self, queue: &MessageQueue) -> Result<(), MessageQueueStorageError>;
+    fn load(&self) -> Result<MessageQueue, MessageQueueStorageError>;
+}
+struct FileStore {
+    path: String,
+}
+
+impl FileStore {
+    fn new(path: &str) -> Self {
+        Self {
+            path: path.to_string(),
+        }
+    }
+}
+
+impl MessageQueueStorage for FileStore {
+    fn save(&self, queue: &MessageQueue) -> Result<(), MessageQueueStorageError> {
+        let path = Path::new(&self.path);
+        let mut file = File::create(&path)?;
+
+        for msg in &queue.messages {
+            writeln!(file, "{},{}", msg.id, msg.content)?;
+        }
+        Ok(())
+    }
+
+    fn load(&self) -> Result<MessageQueue, MessageQueueStorageError> {
+        let mut mq = MessageQueue {
+            messages: VecDeque::new(),
+            next_id: 0,
+        };
+
+        let mut id = 0;
+        for line in fs::read_to_string(&self.path)?.lines() {
+            let string = line.to_string();
+            let parts: Vec<_> = string.split(",").collect();
+            id = parts[0].parse()?;
+            mq.messages.push_back(Message {
+                id,
+                content: parts[1].to_string(),
+            })
+        }
+
+        mq.next_id = id + 1;
+
+        Ok(mq)
+    }
+}
 
 /// *****************************************************************
 /// use `cargo test --bin mc-01` to check your work.
@@ -173,7 +243,7 @@ mod tests {
     const TEST_FILE_NAME: &str = ".mc-01-test";
 
     fn cleanup() {
-        let _ = std::fs::remove_file(TEST_FILE_NAME);
+        let _ = fs::remove_file(TEST_FILE_NAME);
     }
 
     #[test]
@@ -201,4 +271,3 @@ mod tests {
         results.expect("test failed");
     }
 }
-
