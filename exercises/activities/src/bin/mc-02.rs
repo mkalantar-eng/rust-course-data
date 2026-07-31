@@ -47,6 +47,39 @@ impl InventoryManager for BasicInventory {
     }
 }
 
+struct InventoryAlerter<I> {
+    thresholds: HashMap<String, i32>,
+    inventory_manager: I,
+}
+
+impl<I: InventoryManager> InventoryAlerter<I> {
+    fn new(im: I) -> Self {
+        Self {
+            thresholds: Default::default(),
+            inventory_manager: im,
+        }
+    }
+
+    fn set_alert_threshold(&mut self, item: &str, threshold: i32) {
+        self.thresholds.insert(item.to_string(), threshold);
+    }
+}
+impl<M: InventoryManager> InventoryManager for InventoryAlerter<M> {
+    fn update_quantity<I: Into<String>>(&mut self, item: I, amount: i32) {
+        let item = item.into();
+        self.inventory_manager.update_quantity(&item, amount);
+        let current = self.inventory_manager.get_quantity(&item).unwrap();
+        let threshold = self.thresholds.get(&item).unwrap_or(&50);
+        if current <= *threshold {
+            println!("Low quantity of {item}: {current}");
+        }
+    }
+
+    fn get_quantity<I: AsRef<str>>(&self, item: I) -> Option<i32> {
+        self.inventory_manager.get_quantity(&item)
+    }
+}
+
 /***********************************************************************************************
 * Do not edit this function. It should work with the structure that you create without having to
 * make any modifications to the function.
@@ -63,7 +96,7 @@ fn main() {
     /******************************************************
      * Change the below line to create your proxy structure
      ******************************************************/
-    let mut inventory = BasicInventory::default();
+    let mut inventory = InventoryAlerter::new(BasicInventory::default());
 
     /***********************************************************************************************
      * Do not change anything else in this function. When implemented correctly, you should get 2
@@ -84,4 +117,3 @@ fn main() {
     // should have an alert: 60-6 = 54 cilantro which is below the new threshold of 55
     change_quantity(&mut inventory, "cilantro", -6);
 }
-
