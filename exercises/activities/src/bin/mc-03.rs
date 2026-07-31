@@ -9,7 +9,7 @@
 // - Create an extension trait named `AccountExt` that adds two methods to the `Account` trait:
 //   - `withdraw`: removes a specified amount from the account.
 //   - `deposit`: adds a specified amount to the account.
-// - Implement the `AccountExtensions` trait for any type that implements the `Account` trait by
+// - Implement the `AccountExt` trait for any type that implements the `Account` trait by
 //   using a blanket implementation.
 // - Do not change any of the existing code. Only add and implement an extension trait.
 //
@@ -53,6 +53,23 @@ impl Account for BankAccount {
     }
 }
 
+trait AccountExt {
+    fn withdraw(&mut self, amount: f64);
+    fn deposit(&mut self, amount: f64);
+}
+impl<T> AccountExt for T
+where
+    T: Account,
+{
+    fn withdraw(&mut self, amount: f64) {
+        let amount = amount.abs();
+        self.adjust(-amount)
+    }
+
+    fn deposit(&mut self, amount: f64) {
+        self.adjust(amount)
+    }
+}
 /**********************************************
 * Do not change
 **********************************************/
@@ -68,4 +85,3 @@ fn main() {
     // Using the extended deposit method to deposit money
     account.deposit(20.0);
 }
-
