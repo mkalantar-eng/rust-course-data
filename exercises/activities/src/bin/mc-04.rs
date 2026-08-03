@@ -21,15 +21,77 @@
 // - The `.max()` method on iterators won't work for f64. Consider writing a `for` loop and
 //   manually track the highest temperature, or use `.fold`
 
+#[derive(Debug, Default)]
+struct TemperatureSensor {
+    temp_readings: Vec<f64>,
+}
+
+impl TemperatureSensor {
+    pub fn record_temperature(&mut self, temperature: f64) {
+        self.temp_readings.push(temperature);
+    }
+    pub fn get_average_temperature(&self) -> f64 {
+        self.temp_readings.iter().sum::<f64>() / self.temp_readings.len() as f64
+    }
+    pub fn get_max_temperature(&self) -> Option<f64> {
+        if self.temp_readings.iter().len() == 0 {
+            return None;
+        }
+
+        let mut max = f64::MIN;
+        for tmp in self.temp_readings.iter() {
+            if *tmp > max {
+                max = *tmp
+            }
+        }
+
+        Some(max)
+    }
+}
+
 fn main() {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
-    fn feature() {
-        todo!()
+    fn default_temperature_readings_list_is_empty() {
+        let sensor = TemperatureSensor::default();
+        assert_eq!(sensor.temp_readings.len(), 0);
+    }
+    #[test]
+    fn add_a_new_temperature_reading() {
+        let mut sensor = TemperatureSensor::default();
+        sensor.record_temperature(33.0);
+
+        assert_eq!(sensor.temp_readings.len(), 1);
+    }
+    #[test]
+    fn calc_average_temperature() {
+        let mut sensor = TemperatureSensor::default();
+        sensor.record_temperature(23.0);
+        sensor.record_temperature(37.0);
+        sensor.record_temperature(39.0);
+        let avg = sensor.get_average_temperature();
+
+        assert_eq!(33.0, avg);
+    }
+    #[test]
+    fn calc_max_temperature_on_non_empty_list() {
+        let mut sensor = TemperatureSensor::default();
+        sensor.record_temperature(23.0);
+        sensor.record_temperature(37.0);
+        sensor.record_temperature(39.0);
+        let max = sensor.get_max_temperature();
+
+        assert_eq!(39.0, max.unwrap());
+    }
+    #[test]
+    fn calc_max_temperature_on_empty_list() {
+        let sensor = TemperatureSensor::default();
+
+        let max = sensor.get_max_temperature();
+
+        assert_eq!(None, max);
     }
 }
-
