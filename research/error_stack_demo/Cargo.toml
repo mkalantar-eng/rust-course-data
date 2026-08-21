@@ -1,0 +1,7 @@
+[package]
+name = "error_stack_demo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+error-stack = "0.8.0"
