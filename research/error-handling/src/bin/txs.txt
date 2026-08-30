@@ -1,3 +1,4 @@
 payment_id|debit_account|credit_account|amount|reference
 PAY-0001|TREASURY|CUSTOMER_001|125.50|initial funding
 PAY-0002|CUSTOMER_001|MERCHANT_001|19.95|invoice 8731
+PAY-0003|CUSTOMER_002|MERCHANT_002|59.95|invoice 8741
