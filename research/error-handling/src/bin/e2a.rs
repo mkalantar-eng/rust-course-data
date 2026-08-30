@@ -1,3 +1,4 @@
+use fmt::Display;
 use std::fmt;
 use std::fs::File;
 use std::io;
@@ -9,7 +10,7 @@ struct FileError {
     source: io::Error,
 }
 
-impl fmt::Display for FileError {
+impl Display for FileError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}: {}", self.path.display(), self.source)
     }
